@@ -27,6 +27,7 @@ class Settings(BaseSettings):
         "http://localhost:8000",  # Same origin
         "http://localhost:8001",  # Mock scraper service
         "https://yourdomain.com",  # Production frontend
+        "https://frontend-service-0gsj.onrender.com",  # Render frontend
     ]
     
     # Scraper service URL - defaults to mock service in local dev

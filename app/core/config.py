@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     # Mock scraper setting
     USE_MOCK_SCRAPER: bool = os.getenv("USE_MOCK_SCRAPER", "false").lower() in ("true", "1", "t")
     
-    # CORS - defined here rather than in .env to avoid parsing issues
-    CORS_ORIGINS: List[str] = [
+    # Default CORS origins
+    DEFAULT_CORS_ORIGINS: List[str] = [
         "http://localhost:3000",  # Frontend development server
         "http://localhost:8000",  # Same origin
         "http://localhost:8001",  # Mock scraper service
@@ -30,12 +30,13 @@ class Settings(BaseSettings):
         "https://frontend-service-0gsj.onrender.com",  # Render frontend
     ]
     
-    # Use environment variable for CORS if provided, otherwise use the list above
-    # This allows setting CORS_ORIGINS=* in production without code changes
-    CORS_ORIGINS_STR: str = os.getenv("CORS_ORIGINS", "")
-    if CORS_ORIGINS_STR:
-        # Split by comma and strip whitespace
-        CORS_ORIGINS = [origin.strip() for origin in CORS_ORIGINS_STR.split(",")]
+    # Get CORS origins from environment or use defaults
+    CORS_ORIGINS_STR: str = os.getenv("CORS_ORIGINS_STR", "")
+    CORS_ORIGINS: List[str] = [origin.strip() for origin in CORS_ORIGINS_STR.split(",")] if CORS_ORIGINS_STR else DEFAULT_CORS_ORIGINS
+    
+    # Special case for wildcard
+    if os.getenv("ALLOW_ALL_ORIGINS", "").lower() in ("true", "1", "t"):
+        CORS_ORIGINS = ["*"]
     
     # Scraper service URL - defaults to mock service in local dev
     SCRAPER_SERVICE_URL: str = os.getenv("SCRAPER_SERVICE_URL", "http://localhost:8001")

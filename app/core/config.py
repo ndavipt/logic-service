@@ -28,8 +28,14 @@ class Settings(BaseSettings):
         "http://localhost:8001",  # Mock scraper service
         "https://yourdomain.com",  # Production frontend
         "https://frontend-service-0gsj.onrender.com",  # Render frontend
-        "*",  # Allow all origins (alternative approach)
     ]
+    
+    # Use environment variable for CORS if provided, otherwise use the list above
+    # This allows setting CORS_ORIGINS=* in production without code changes
+    CORS_ORIGINS_STR: str = os.getenv("CORS_ORIGINS", "")
+    if CORS_ORIGINS_STR:
+        # Split by comma and strip whitespace
+        CORS_ORIGINS = [origin.strip() for origin in CORS_ORIGINS_STR.split(",")]
     
     # Scraper service URL - defaults to mock service in local dev
     SCRAPER_SERVICE_URL: str = os.getenv("SCRAPER_SERVICE_URL", "http://localhost:8001")

@@ -28,6 +28,8 @@ class Settings(BaseSettings):
         "http://localhost:8001",  # Mock scraper service
         "https://yourdomain.com",  # Production frontend
         "https://frontend-service-0gsj.onrender.com",  # Render frontend
+        "https://logic-service-2s7j.onrender.com",  # Logic service
+        "*",  # Allow all origins
     ]
     
     # Get CORS origins from environment or use defaults

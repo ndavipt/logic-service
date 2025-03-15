@@ -127,6 +127,7 @@ def calculate_rolling_average(profiles: List[Dict], days: int = 7) -> Dict:
     day_changes = []
     daily_data = {}
     
+    # Get the latest profile for each day
     for profile in window_profiles:
         day_key = profile["checked_at"].date().isoformat()
         if day_key not in daily_data or profile["checked_at"] > daily_data[day_key]["checked_at"]:
@@ -141,9 +142,19 @@ def calculate_rolling_average(profiles: List[Dict], days: int = 7) -> Dict:
         curr_day = sorted_days[i]
         
         change = daily_data[curr_day]["follower_count"] - daily_data[prev_day]["follower_count"]
-        day_changes.append(change)
+        
+        # Calculate hours between measurements for normalizing to daily change
+        hours_between = (daily_data[curr_day]["checked_at"] - daily_data[prev_day]["checked_at"]).total_seconds() / 3600
+        
+        # Normalize to daily change rate (24 hours) if we have different intervals
+        if hours_between > 0 and hours_between != 24:
+            normalized_change = (change / hours_between) * 24
+        else:
+            normalized_change = change
+            
+        day_changes.append(normalized_change)
     
-    # Calculate average
+    # Calculate average (handling empty list case)
     avg_change = sum(day_changes) / len(day_changes) if day_changes else 0
     
     return {

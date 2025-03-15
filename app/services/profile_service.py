@@ -5,6 +5,7 @@ from sqlalchemy import desc, func
 
 from app.models.account import InstagramAccount
 from app.models.profile import InstagramProfile
+from app.services.cache import clear_cache_pattern
 
 def get_latest_profiles(db: Session) -> List[dict]:
     """
@@ -121,3 +122,13 @@ def get_followers_at_time(db: Session, username: str, target_time: datetime) -> 
         "follower_count": profile.follower_count,
         "checked_at": profile.checked_at
     }
+
+def refresh_analytics_cache(username: str) -> None:
+    """
+    Clear analytics cache for a specific username when new data is available.
+    This ensures that analytics endpoints will recalculate with the latest data.
+    """
+    # Clear all analytics cache patterns for this username
+    clear_cache_pattern(f"growth_metrics:{username}:*")
+    clear_cache_pattern(f"follower_changes:{username}:*")
+    clear_cache_pattern(f"rolling_average:{username}:*")

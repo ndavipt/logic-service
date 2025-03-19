@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # Import mock implementation if configured
 if settings.USE_MOCK_SCRAPER:
     from app.services.mock_scraper_service import (
-        fetch_latest_profiles, fetch_accounts, trigger_scrape, add_account
+        fetch_latest_profiles, fetch_accounts, trigger_scrape, add_account, delete_account
     )
 else:
     # Real implementation that calls the external service
@@ -109,4 +109,23 @@ else:
             return {"status": "error", "message": str(e)}
         except Exception as e:
             logger.error(f"Unexpected error while adding account: {e}")
+            return {"status": "error", "message": str(e)}
+            
+    async def delete_account(username: str) -> Dict:
+        """
+        Delete an account from tracking in the Scraper Service.
+        """
+        try:
+            logger.info(f"Deleting account {username} at {settings.SCRAPER_SERVICE_URL}/accounts/{username}")
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.delete(
+                    f"{settings.SCRAPER_SERVICE_URL}/accounts/{username}"
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error while deleting account: {e}")
+            return {"status": "error", "message": str(e)}
+        except Exception as e:
+            logger.error(f"Unexpected error while deleting account: {e}")
             return {"status": "error", "message": str(e)}

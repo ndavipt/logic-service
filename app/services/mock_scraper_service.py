@@ -82,3 +82,24 @@ async def add_account(username: str) -> Dict:
     _profiles.append(new_profile)
     
     return new_account
+
+async def delete_account(username: str) -> Dict:
+    """
+    Mock implementation that deletes an account.
+    """
+    logger.info(f"Using mock scraper service: delete_account({username})")
+    
+    # Find and remove account
+    for i, account in enumerate(_accounts):
+        if account["username"] == username:
+            del _accounts[i]
+            
+            # Remove associated profile
+            for j, profile in enumerate(_profiles):
+                if profile["username"] == username:
+                    del _profiles[j]
+                    break
+                    
+            return {"message": f"Account '{username}' and all associated profile data deleted successfully"}
+    
+    return {"status": "error", "message": f"Account '{username}' not found"}

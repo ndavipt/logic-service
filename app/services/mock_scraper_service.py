@@ -59,8 +59,19 @@ async def trigger_scrape() -> Dict:
 async def add_account(username: str) -> Dict:
     """
     Mock implementation that adds an account.
+    
+    Matches the real scraper service API format:
+    - Expects username parameter
+    - Returns result in the format of {"status": "success", "message": "..."}
     """
     logger.info(f"Using mock scraper service: add_account({username})")
+    
+    # Check if account already exists
+    if any(account["username"] == username for account in _accounts):
+        return {
+            "status": "error",
+            "message": f"Account not added: Account with username '{username}' already exists"
+        }
     
     # Create new account
     new_account = {
@@ -81,7 +92,11 @@ async def add_account(username: str) -> Dict:
     }
     _profiles.append(new_profile)
     
-    return new_account
+    # Return result formatted like the real API would
+    return {
+        "status": "success",
+        "message": f"Successfully added account: {username}"
+    }
 
 async def delete_account(username: str) -> Dict:
     """

@@ -94,16 +94,44 @@ else:
     async def add_account(username: str) -> Dict:
         """
         Add a new account to track in the Scraper Service.
+        
+        Uses the scraper service API format:
+        - POST /accounts with {"accounts": [{"username": "name"}]}
+        - Response includes "added" and "skipped" arrays
         """
         try:
             logger.info(f"Adding account {username} at {settings.SCRAPER_SERVICE_URL}/accounts")
+            payload = {
+                "accounts": [
+                    {"username": username}
+                ]
+            }
+            headers = {"Content-Type": "application/json"}
+            
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.post(
                     f"{settings.SCRAPER_SERVICE_URL}/accounts",
-                    json={"username": username}
+                    json=payload,
+                    headers=headers
                 )
                 response.raise_for_status()
-                return response.json()
+                result = response.json()
+                
+                # Process response to return meaningful result
+                if username in result.get("added", []):
+                    return {
+                        "status": "success", 
+                        "message": f"Successfully added account: {username}"
+                    }
+                else:
+                    # Find reason in skipped array if account wasn't added
+                    reason = next((item["reason"] for item in result.get("skipped", [])
+                                if item["username"] == username), "Unknown reason")
+                    return {
+                        "status": "error", 
+                        "message": f"Account not added: {reason}"
+                    }
+                    
         except httpx.HTTPError as e:
             logger.error(f"HTTP error while adding account: {e}")
             return {"status": "error", "message": str(e)}
